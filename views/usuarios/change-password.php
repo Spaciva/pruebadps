@@ -59,6 +59,10 @@
                                    required 
                                    minlength="8"
                                    placeholder="Mínimo 8 caracteres">
+                            <div class="progress mt-2" style="height:6px;" id="strengthBar" hidden>
+                                <div class="progress-bar" id="strengthFill" role="progressbar" style="width:0%"></div>
+                            </div>
+                            <small id="strengthLabel" class="text-muted"></small>
                             <small class="text-muted d-block mt-2">
                                 <i class="bi bi-info-circle"></i>
                                 Recomendaciones:
@@ -83,6 +87,7 @@
                                    required 
                                    minlength="8"
                                    placeholder="Repite la contraseña">
+                            <small id="matchLabel" class="text-muted"></small>
                         </div>
 
                         <!-- Botones -->
@@ -106,6 +111,66 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    const passInput  = document.getElementById('password');
+    const confirmInput = document.getElementById('confirm');
+    const strengthBar  = document.getElementById('strengthBar');
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthLabel = document.getElementById('strengthLabel');
+    const matchLabel   = document.getElementById('matchLabel');
+
+    const levels = [
+        { pct: '0%',   color: 'bg-secondary', text: '' },
+        { pct: '25%',  color: 'bg-danger',    text: 'Débil' },
+        { pct: '50%',  color: 'bg-warning',   text: 'Regular' },
+        { pct: '75%',  color: 'bg-primary',   text: 'Buena' },
+        { pct: '100%', color: 'bg-success',   text: 'Muy segura' },
+    ];
+
+    passInput.addEventListener('input', () => {
+        const v = passInput.value;
+        let score = 0;
+        if (v.length >= 8)           score++;
+        if (/[A-Z]/.test(v))         score++;
+        if (/[0-9]/.test(v))         score++;
+        if (/[^A-Za-z0-9]/.test(v))  score++;
+
+        strengthBar.hidden = v.length === 0;
+        strengthFill.className = 'progress-bar ' + levels[score].color;
+        strengthFill.style.width = levels[score].pct;
+        strengthLabel.textContent = levels[score].text;
+
+        updateMatch();
+    });
+
+    confirmInput.addEventListener('input', updateMatch);
+
+    function updateMatch() {
+        const p = passInput.value;
+        const c = confirmInput.value;
+        if (c.length === 0) { matchLabel.textContent = ''; return; }
+        if (p === c) {
+            matchLabel.className = 'text-success';
+            matchLabel.textContent = '✔ Las contraseñas coinciden.';
+        } else {
+            matchLabel.className = 'text-danger';
+            matchLabel.textContent = '✖ Las contraseñas no coinciden.';
+        }
+    }
+
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const p = passInput.value;
+        const c = confirmInput.value;
+        if (p !== c) {
+            e.preventDefault();
+            matchLabel.className = 'text-danger';
+            matchLabel.textContent = '✖ Las contraseñas no coinciden.';
+            confirmInput.focus();
+        }
+    });
+})();
+</script>
 
 </body>
 </html>

@@ -95,23 +95,41 @@ class Prestamo {
     }
 
     /**
+     * Verifica si el usuario tiene o tuvo algún préstamo del libro indicado.
+     */
+    public function tienePrestamoLibro(int $usuarioId, int $libroId): bool {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) FROM prestamos
+             WHERE usuario_id = :usuario_id AND libro_id = :libro_id"
+        );
+        $stmt->execute([':usuario_id' => $usuarioId, ':libro_id' => $libroId]);
+        return $stmt->fetchColumn() > 0;
+    }
+
+    /**
      * Crea un nuevo préstamo.
      */
     public function create(array $data): bool {
+        $usuarioId = Security::sanitizeInt($data['usuario_id'] ?? $data['usuarioId'] ?? 0);
+        $libroId = Security::sanitizeInt($data['libro_id'] ?? $data['libroId'] ?? 0);
+
         $stmt = $this->db->prepare(
             "INSERT INTO prestamos (usuario_id, libro_id, fecha_prestamo, fecha_devolucion_esperada, estado, created_at)
              VALUES (:usuario_id, :libro_id, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY), 'activo', NOW())"
         );
         $result = $stmt->execute([
-            ':usuario_id' => Security::sanitizeInt($data['usuario_id'] ?? 0),
-            ':libro_id'   => Security::sanitizeInt($data['libro_id'] ?? 0),
+            ':usuario_id' => $usuarioId,
+            ':libro_id'   => $libroId,
         ]);
 
-        // Si se crea exitosamente, decrementar cantidad de libros
+        // Si se crea exitosamente, decrementar cantidad y actualizar estado
         if ($result) {
-            $libroId = Security::sanitizeInt($data['libro_id'] ?? 0);
-            $this->db->prepare("UPDATE libros SET cantidad = cantidad - 1 WHERE id = :id")
-                    ->execute([':id' => $libroId]);
+            $this->db->prepare(
+                "UPDATE libros
+                 SET cantidad = cantidad - 1,
+                     estado = CASE WHEN (cantidad - 1) <= 0 THEN 'agotado' ELSE 'disponible' END
+                 WHERE id = :id"
+            )->execute([':id' => $libroId]);
         }
 
         return $result;
@@ -132,13 +150,17 @@ class Prestamo {
         );
         $result = $stmt->execute([':id' => $prestamoId, ':multa' => $multa]);
 
-        // Si se devuelve exitosamente, incrementar cantidad de libros
+        // Si se devuelve exitosamente, incrementar cantidad y actualizar estado
         if ($result) {
             $prestamo = $this->getById($prestamoId);
             if ($prestamo) {
                 $libroId = $prestamo['libro_id'];
-                $this->db->prepare("UPDATE libros SET cantidad = cantidad + 1 WHERE id = :id")
-                        ->execute([':id' => $libroId]);
+                $this->db->prepare(
+                    "UPDATE libros
+                     SET cantidad = cantidad + 1,
+                         estado = 'disponible'
+                     WHERE id = :id"
+                )->execute([':id' => $libroId]);
             }
         }
 

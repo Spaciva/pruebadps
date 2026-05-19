@@ -23,11 +23,15 @@ justify-content:center;
 align-items:center;
 
 min-height:100vh;
+
+padding:16px;
 }
 
 .auth-card{
 
-width:420px;
+width:100%;
+
+max-width:420px;
 
 background:white;
 
@@ -37,6 +41,8 @@ border-radius:20px;
 
 box-shadow:
 0 5px 20px rgba(0,0,0,.1);
+
+box-sizing:border-box;
 }
 
 .logo-circle{

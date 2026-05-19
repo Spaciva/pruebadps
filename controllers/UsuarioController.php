@@ -23,7 +23,7 @@ class UsuarioController {
      * Muestra la lista de todos los usuarios (solo admin).
      */
     public function index(): void {
-        Session::requireRole(['admin']);
+        Session::requireRole(['admin', 'bibliotecario']);
         $usuarios = $this->usuarioModel->getAll();
         require_once __DIR__ . '/../views/usuarios/index.php';
     }
@@ -153,6 +153,8 @@ class UsuarioController {
         }
 
         if (strlen($password) < 8) $errors[] = 'La contraseña debe tener al menos 8 caracteres.';
+        if (!preg_match('/[A-Z]/', $password)) $errors[] = 'La contraseña debe tener al menos una mayúscula.';
+        if (!preg_match('/[0-9]/', $password)) $errors[] = 'La contraseña debe tener al menos un número.';
         if ($password !== $confirm) $errors[] = 'Las contraseñas no coinciden.';
 
         if (!empty($errors)) {

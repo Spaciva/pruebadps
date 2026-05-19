@@ -201,17 +201,24 @@ $csrfField = Security::csrfField();
         /* Toggle contraseña */
         .toggle-pass {
             position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
+            right: 2px;
+            top: 2px;
+            bottom: 2px;
+            width: 38px;
+            background: transparent;
             border: none;
+            border-radius: 0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0;
             cursor: pointer;
             color: var(--color-muted);
-            font-size: 14px;
-            padding: 4px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            transition: color 0.2s;
         }
         .toggle-pass:hover { color: var(--color-nav); }
+        .toggle-pass:focus { outline: none; box-shadow: none; }
 
         /* ── Recordarme ── */
         .remember-row {
@@ -339,6 +346,7 @@ $csrfField = Security::csrfField();
                     placeholder="••••••••••"
                     autocomplete="current-password"
                     required
+                    style="padding-right: 42px;"
                 >
                 <button type="button" class="toggle-pass" onclick="togglePassword()" title="Mostrar/ocultar contraseña">
                     <i class="fas fa-eye" id="eyeIcon"></i>

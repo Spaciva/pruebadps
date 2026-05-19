@@ -2,9 +2,9 @@
 
 <div class="card">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
 
-<h1>📅 Gestión de Préstamos</h1>
+<h1><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Gestión de Préstamos</h1>
 
 <div>
 
@@ -132,9 +132,9 @@ $p['fecha_devolucion_esperada']
 
 <td>
 
-<?= ucfirst(
-$p['estado']
-) ?>
+<span class="badge badge-<?= $p['estado'] ?>">
+<?= ucfirst($p['estado']) ?>
+</span>
 
 </td>
 
@@ -144,10 +144,12 @@ $p['estado']
 $p['estado']==='activo'
 ): ?>
 
+<div style="display:flex; gap:6px; align-items:center; justify-content:center;">
+
 <form
 method="POST"
 action="index.php?page=prestamos&action=devolucion"
-style="display:inline;">
+style="margin:0;">
 
 <?= Security::csrfField() ?>
 
@@ -158,19 +160,17 @@ value="<?= $p['id'] ?>">
 
 <button
 type="submit"
-class="btn btn-success">
-
-Devolver
-
+class="btn-icon btn-success"
+title="Registrar devolución">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
 </button>
 
 </form>
-
 
 <form
 method="POST"
 action="index.php?page=prestamos&action=renovar"
-style="display:inline;">
+style="margin:0;">
 
 <?= Security::csrfField() ?>
 
@@ -181,13 +181,14 @@ value="<?= $p['id'] ?>">
 
 <button
 type="submit"
-class="btn btn-warning">
-
-Renovar
-
+class="btn-icon btn-warning"
+title="Renovar préstamo">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
 </button>
 
 </form>
+
+</div>
 
 <?php endif; ?>
 

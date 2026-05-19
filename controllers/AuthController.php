@@ -113,7 +113,7 @@ class AuthController {
      */
     public function showRegister(): void {
 
-        Session::requireRole(['admin']);
+        Session::requireRole(['admin', 'bibliotecario']);
 
         require_once __DIR__ . '/../views/auth/register.php';
     }
@@ -123,14 +123,20 @@ class AuthController {
      */
     public function processRegister(): void {
 
-        Session::requireRole(['admin']);
+        Session::requireRole(['admin', 'bibliotecario']);
 
         Security::validateCSRF();
 
         $nombre   = Security::sanitizeString($_POST['nombre'] ?? '');
         $email    = Security::sanitizeEmail($_POST['correo'] ?? '');
         $telefono = Security::sanitizeString($_POST['telefono'] ?? '');
-        $rol      = Security::sanitizeString($_POST['rol'] ?? 'usuario');
+
+        // Bibliotecario solo puede registrar con rol 'usuario'
+        if (Session::get('user_role') === 'bibliotecario') {
+            $rol = 'usuario';
+        } else {
+            $rol = Security::sanitizeString($_POST['rol'] ?? 'usuario');
+        }
         $password = $_POST['contrasena'] ?? '';
         $confirm  = $_POST['confirmar'] ?? '';
 

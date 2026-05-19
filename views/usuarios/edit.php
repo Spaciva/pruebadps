@@ -89,13 +89,13 @@
                             </label>
                             <select id="rol" name="rol" class="form-select" required>
                                 <option value="usuario" <?= $usuario['rol'] === 'usuario' ? 'selected' : '' ?>>
-                                    👤 Usuario
+                                    Usuario
                                 </option>
                                 <option value="bibliotecario" <?= $usuario['rol'] === 'bibliotecario' ? 'selected' : '' ?>>
-                                    📚 Bibliotecario
+                                    Bibliotecario
                                 </option>
                                 <option value="admin" <?= $usuario['rol'] === 'admin' ? 'selected' : '' ?>>
-                                    🔑 Administrador
+                                    Administrador
                                 </option>
                             </select>
                         </div>

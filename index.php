@@ -204,8 +204,7 @@ break;
 case 'categorias':
 
     Session::requireRole([
-        'admin',
-        'bibliotecario'
+        'admin'
     ]);
 
     require_once __DIR__ .
@@ -325,7 +324,8 @@ break;
 case 'usuarios':
 
     Session::requireRole([
-        'admin'
+        'admin',
+        'bibliotecario'
     ]);
 
     require_once __DIR__ .
@@ -343,8 +343,11 @@ case 'usuarios':
             'delete'
                 => $ctrl->delete(),
 
-            'process-password'
+            'process-change-password'
                 => $ctrl->processChangePassword(),
+
+            'toggle-status'
+                => $ctrl->toggleStatus(),
 
             default
                 => $ctrl->index()
@@ -362,6 +365,83 @@ case 'usuarios':
 
             default
                 => $ctrl->index()
+        };
+
+    }
+
+break;
+
+
+// ── CATÁLOGO DE LIBROS (USUARIO) ─────────────────────────────
+
+case 'catalogo-libros':
+
+    Session::requireLogin();
+
+    require_once __DIR__ .
+    '/controllers/LibroController.php';
+
+    $ctrl = new LibroController();
+
+    if (
+        $_SERVER['REQUEST_METHOD'] === 'POST'
+        && $action === 'calificar'
+    ) {
+        $ctrl->calificar();
+    } else {
+        $ctrl->catalogo();
+    }
+
+break;
+
+
+// ── MIS PRÉSTAMOS (USUARIO) ──────────────────────────────────
+
+case 'mis-prestamos':
+
+    Session::requireLogin();
+
+    require_once __DIR__ .
+    '/controllers/PrestamoController.php';
+
+    $ctrl = new PrestamoController();
+
+    if (
+        $_SERVER['REQUEST_METHOD'] === 'POST'
+        && $action === 'calificar'
+    ) {
+        $ctrl->calificarLibro();
+    } else {
+        $ctrl->misPrestamos();
+    }
+
+break;
+
+
+// ── REPORTES (solo admin) ─────────────────────────────────────
+
+case 'reportes':
+
+    Session::requireRole(['admin']);
+
+    require_once __DIR__ .
+    '/controllers/ReporteController.php';
+
+    $ctrl = new ReporteController();
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        match($action) {
+            'guardar' => $ctrl->guardar(),
+            default   => $ctrl->index()
+        };
+
+    } else {
+
+        match($action) {
+            'ver'      => $ctrl->ver(),
+            'exportar' => $ctrl->exportar(),
+            default    => $ctrl->index()
         };
 
     }

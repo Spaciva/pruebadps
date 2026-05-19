@@ -56,6 +56,20 @@ class Autor {
     }
 
     /**
+     * Obtiene un autor por nombre.
+     */
+    public function getByName(string $nombre): array|false {
+        $stmt = $this->db->prepare(
+            "SELECT id, nombre, nacionalidad, created_at
+             FROM autores
+             WHERE nombre = :nombre
+             LIMIT 1"
+        );
+        $stmt->execute([':nombre' => $nombre]);
+        return $stmt->fetch();
+    }
+
+    /**
      * Crea un nuevo autor.
      */
     public function create(array $data): bool {

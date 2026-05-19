@@ -19,11 +19,16 @@ class Libro {
      */
     public function getAll(): array {
         $stmt = $this->db->query(
-            "SELECT l.id, l.titulo, a.nombre AS autor, c.nombre AS categoria, 
-                    l.isbn, l.cantidad, l.estado, l.created_at
+            "SELECT l.id, l.titulo, a.nombre AS autor, c.nombre AS categoria,
+                    l.isbn, l.cantidad, l.estado, l.created_at,
+                    ROUND(AVG(cal.estrellas), 1) AS promedio_calificacion,
+                    COUNT(cal.id)               AS total_calificaciones
              FROM libros l
-             LEFT JOIN autores a ON l.autor_id = a.id
-             LEFT JOIN categorias c ON l.categoria_id = c.id
+             LEFT JOIN autores a        ON l.autor_id   = a.id
+             LEFT JOIN categorias c     ON l.categoria_id = c.id
+             LEFT JOIN calificaciones cal ON cal.libro_id  = l.id
+             GROUP BY l.id, l.titulo, a.nombre, c.nombre,
+                      l.isbn, l.cantidad, l.estado, l.created_at
              ORDER BY l.titulo"
         );
         return $stmt->fetchAll();
@@ -207,7 +212,9 @@ public function search(string $query): array {
                 c.nombre AS categoria,
                 l.isbn,
                 l.cantidad,
-                l.estado
+                l.estado,
+                ROUND(AVG(cal.estrellas), 1) AS promedio_calificacion,
+                COUNT(cal.id)               AS total_calificaciones
 
         FROM libros l
 
@@ -217,8 +224,14 @@ public function search(string $query): array {
         LEFT JOIN categorias c
         ON l.categoria_id = c.id
 
+        LEFT JOIN calificaciones cal
+        ON cal.libro_id = l.id
+
         WHERE l.titulo LIKE :titulo
         OR l.isbn LIKE :isbn
+
+        GROUP BY l.id, l.titulo, a.nombre, c.nombre,
+                 l.isbn, l.cantidad, l.estado
 
         ORDER BY l.titulo"
 

@@ -40,7 +40,10 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="isbn" class="form-label"><i class="bi bi-barcode"></i> ISBN</label>
-                                <input type="text" id="isbn" name="isbn" class="form-control" value="<?= Security::escape($libro['isbn']) ?>" required>
+                                <input type="text" id="isbn" name="isbn" class="form-control" value="<?= Security::escape($libro['isbn']) ?>" required
+                                       placeholder="ej. 978-3-16-148410-0"
+                                       title="ISBN de 10 o 13 dígitos (guiones opcionales)">
+                                <small class="text-muted">ISBN-10 o ISBN-13 (guiones opcionales)</small>
                             </div>
                         </div>
 
@@ -106,6 +109,29 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.querySelector('form').addEventListener('submit', function (e) {
+    const isbn = document.getElementById('isbn').value.replace(/[\s\-]/g, '');
+    const valid = /^[0-9]{9}[0-9Xx]$/.test(isbn) || /^97[89][0-9]{10}$/.test(isbn);
+    if (!valid) {
+        e.preventDefault();
+        document.getElementById('isbn').classList.add('is-invalid');
+        let fb = document.getElementById('isbn-feedback');
+        if (!fb) {
+            fb = document.createElement('div');
+            fb.id = 'isbn-feedback';
+            fb.className = 'invalid-feedback';
+            fb.textContent = 'ISBN inválido. Debe tener 10 o 13 dígitos (guiones opcionales).';
+            document.getElementById('isbn').after(fb);
+        }
+    } else {
+        document.getElementById('isbn').classList.remove('is-invalid');
+    }
+});
+document.getElementById('isbn').addEventListener('input', function () {
+    this.classList.remove('is-invalid');
+});
+</script>
 
 </body>
 </html>

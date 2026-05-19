@@ -1,25 +1,12 @@
 <?php require_once __DIR__.'/../layouts/header.php'; ?>
 
-<style>
-.badge-disponible{
-    background:#28a745;
-}
 
-.badge-reservado{
-    background:#ffc107;
-    color:black;
-}
-
-.badge-agotado{
-    background:#dc3545;
-}
-</style>
 
 <div class="card">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
 
-<h1>📚 Gestión de Libros</h1>
+<h1><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>Gestión de Libros</h1>
 
 <a href="index.php?page=libros&action=create"
 class="btn btn-primary">
@@ -96,6 +83,7 @@ Buscar
 
 <!-- TABLA -->
 
+<div style="overflow-x:auto;">
 <table>
 
 <thead>
@@ -109,6 +97,7 @@ Buscar
 <th>ISBN</th>
 <th>Cantidad</th>
 <th>Estado</th>
+<th>Calificación</th>
 <th>Acciones</th>
 
 </tr>
@@ -121,7 +110,7 @@ Buscar
 
 <tr>
 
-<td colspan="8">
+<td colspan="9">
 
 No hay libros registrados
 
@@ -193,13 +182,35 @@ $libro['estado']
 </td>
 
 <td>
+<?php
+    $promedio = $libro['promedio_calificacion'] ?? null;
+    $total    = (int)($libro['total_calificaciones'] ?? 0);
+    $rounded  = $promedio ? (int)round((float)$promedio) : 0;
+?>
+<div class="stars-display">
+<?php for ($i = 1; $i <= 5; $i++): ?>
+<span class="star <?= $i <= $rounded ? 'star-filled' : 'star-empty' ?>">&#9733;</span>
+<?php endfor; ?>
+</div>
+<div class="stars-meta">
+<?php if ($promedio): ?>
+    <?= number_format((float)$promedio, 1) ?> / 5
+    <span style="color:#aaa;">(<?= $total ?>)</span>
+<?php else: ?>
+    <span style="color:#aaa;">Sin votos</span>
+<?php endif; ?>
+</div>
+</td>
+
+<td>
+
+<div style="display:flex; gap:6px; align-items:center; justify-content:center;">
 
 <a
 href="index.php?page=libros&action=edit&id=<?= $libro['id'] ?>"
-class="btn btn-warning">
-
-Editar
-
+class="btn-icon btn-warning"
+title="Editar libro">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
 </a>
 
 <?php if($_SESSION['user_role']==='admin'): ?>
@@ -207,7 +218,8 @@ Editar
 <form
 method="POST"
 action="index.php?page=libros&action=delete"
-style="display:inline;">
+style="margin:0;"
+onsubmit="return confirm('¿Eliminar este libro?');">
 
 <?= Security::csrfField() ?>
 
@@ -218,15 +230,16 @@ value="<?= $libro['id'] ?>">
 
 <button
 type="submit"
-class="btn btn-danger">
-
-Eliminar
-
+class="btn-icon btn-danger"
+title="Eliminar libro">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
 </button>
 
 </form>
 
 <?php endif; ?>
+
+</div>
 
 </td>
 
@@ -239,6 +252,7 @@ Eliminar
 </tbody>
 
 </table>
+</div>
 
 </div>
 

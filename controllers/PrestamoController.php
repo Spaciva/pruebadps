@@ -8,6 +8,7 @@ require_once __DIR__ . '/../config/security.php';
 require_once __DIR__ . '/../models/Prestamo.php';
 require_once __DIR__ . '/../models/Libro.php';
 require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/../models/Calificacion.php';
 
 class PrestamoController {
 
@@ -51,6 +52,7 @@ class PrestamoController {
         $libro = $libroId > 0 ? $this->libroModel->getById($libroId) : false;
 
         if (!$usuario) $errors[] = 'Usuario no encontrado.';
+        if ($usuario && ($usuario['estado'] ?? 'activo') !== 'activo') $errors[] = 'El usuario está inactivo y no puede recibir préstamos.';
         if (!$libro) $errors[] = 'Libro no encontrado.';
         if ($libro && $libro['cantidad'] <= 0) $errors[] = 'No hay copias disponibles de este libro.';
         if ($usuario && !$this->prestamoModel->puedePrestar($usuarioId)) {
@@ -63,7 +65,7 @@ class PrestamoController {
             exit();
         }
 
-        if ($this->prestamoModel->create(compact('usuarioId', 'libroId'))) {
+        if ($this->prestamoModel->create(['usuario_id' => $usuarioId, 'libro_id' => $libroId])) {
             $_SESSION['success'] = 'Préstamo registrado exitosamente.';
             header('Location: index.php?page=prestamos');
         } else {
@@ -124,11 +126,46 @@ class PrestamoController {
         require_once __DIR__ . '/../views/prestamos/vencidos.php';
     }
 
-    public function misPrestarmos(): void {
+    public function misPrestamos(): void {
         Session::requireLogin();
-        $usuarioId = $_SESSION['user_id'];
+        $usuarioId = (int)$_SESSION['user_id'];
         $prestamos = $this->prestamoModel->getByUsuarioActivos($usuarioId);
-        $multas = $this->prestamoModel->getMultasPendientes($usuarioId);
+        $multas    = $this->prestamoModel->getMultasPendientes($usuarioId);
+
+        $calModel = new Calificacion();
+        $misCalificaciones = $calModel->getUserRatings($usuarioId);
+
         require_once __DIR__ . '/../views/prestamos/mis-prestamos.php';
+    }
+
+    // ─── CALIFICAR LIBRO DESDE MIS PRÉSTAMOS ──────────────────────────────
+
+    public function calificarLibro(): void {
+        Session::requireRole(['usuario', 'bibliotecario']);
+        Security::validateCSRF();
+
+        $libroId   = Security::sanitizeInt($_POST['libro_id']  ?? 0);
+        $estrellas = Security::sanitizeInt($_POST['estrellas'] ?? 0);
+        $usuarioId = (int)Session::get('user_id');
+
+        if ($libroId <= 0 || $estrellas < 1 || $estrellas > 5) {
+            $_SESSION['cal_error'] = 'Calificación inválida. Selecciona entre 1 y 5 estrellas.';
+            header('Location: index.php?page=mis-prestamos');
+            exit();
+        }
+
+        // Verificar que el usuario tenga o haya tenido este libro en préstamo
+        if (!$this->prestamoModel->tienePrestamoLibro($usuarioId, $libroId)) {
+            $_SESSION['cal_error'] = 'Solo puedes calificar libros que hayas tenido en préstamo.';
+            header('Location: index.php?page=mis-prestamos');
+            exit();
+        }
+
+        $calModel = new Calificacion();
+        $calModel->rate($usuarioId, $libroId, $estrellas);
+
+        $_SESSION['cal_success'] = 'Tu calificación fue guardada exitosamente.';
+        header('Location: index.php?page=mis-prestamos');
+        exit();
     }
 }

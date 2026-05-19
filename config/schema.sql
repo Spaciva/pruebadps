@@ -91,6 +91,37 @@ CREATE TABLE IF NOT EXISTS devoluciones (
     INDEX idx_prestamo(prestamo_id)
 ) ENGINE=InnoDB;
 
+-- ── Tabla: calificaciones ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS calificaciones (
+    id          INT UNSIGNED     AUTO_INCREMENT PRIMARY KEY,
+    usuario_id  INT UNSIGNED     NOT NULL,
+    libro_id    INT UNSIGNED     NOT NULL,
+    estrellas   TINYINT UNSIGNED NOT NULL,
+    created_at  TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP        DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_estrellas CHECK (estrellas BETWEEN 1 AND 5),
+    UNIQUE KEY uq_usuario_libro (usuario_id, libro_id),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (libro_id)   REFERENCES libros(id)   ON DELETE CASCADE,
+    INDEX idx_libro_cal (libro_id)
+) ENGINE=InnoDB;
+
+-- ── Tabla: reportes_mensuales ────────────────────────────────
+CREATE TABLE IF NOT EXISTS reportes_mensuales (
+    id              INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+    anio            SMALLINT UNSIGNED NOT NULL,
+    mes             TINYINT UNSIGNED  NOT NULL,   -- 1-12
+    datos           JSON              NOT NULL,   -- snapshot del reporte
+    generado_por    INT UNSIGNED      DEFAULT NULL,
+    created_at      TIMESTAMP         DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP         DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uk_anio_mes (anio, mes),
+    FOREIGN KEY (generado_por) REFERENCES usuarios(id) ON DELETE SET NULL,
+    INDEX idx_anio_mes (anio, mes)
+) ENGINE=InnoDB;
+
 -- ── Datos iniciales ───────────────────────────────────────────
 -- Usuario administrador por defecto
 -- Contraseña: Admin@2026 (cambiar tras el primer acceso)
