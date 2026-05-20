@@ -212,42 +212,97 @@ class UsuarioController {
     // ─── ELIMINAR USUARIO ─────────────────────────────────────────────────────
 
     /**
-     * Elimina un usuario de forma permanente.
-     */
-    public function delete(): void {
-        Session::requireRole(['admin']);
-        Security::validateCSRF();
+ * Elimina un usuario de forma permanente.
+ */
+public function delete(): void {
 
-        $id = Security::sanitizeInt($_POST['id'] ?? 0);
-        if (!$id) {
-            $_SESSION['error'] = 'Usuario no especificado.';
-            header('Location: index.php?page=usuarios');
-            exit();
-        }
+    Session::requireRole(['admin']);
+    Security::validateCSRF();
 
-        $usuario = $this->usuarioModel->getById($id);
-        if (!$usuario) {
-            $_SESSION['error'] = 'Usuario no encontrado.';
-            header('Location: index.php?page=usuarios');
-            exit();
-        }
+    $id = Security::sanitizeInt(
+        $_POST['id'] ?? 0
+    );
 
-        // Prevenir que se elimine a sí mismo
-        if ($usuario['id'] == $_SESSION['user_id']) {
-            $_SESSION['error'] = 'No puedes eliminar tu propia cuenta.';
-            header('Location: index.php?page=usuarios');
-            exit();
-        }
+    if(!$id){
 
-        $deleted = $this->usuarioModel->delete($id);
+        $_SESSION['error'] =
+        'Usuario no especificado.';
 
-        if ($deleted) {
-            $_SESSION['success'] = 'Usuario eliminado correctamente.';
-        } else {
-            $_SESSION['error'] = 'Error al eliminar el usuario.';
-        }
+        header(
+        'Location: index.php?page=usuarios'
+        );
 
-        header('Location: index.php?page=usuarios');
         exit();
     }
+
+    $usuario =
+    $this->usuarioModel->getById($id);
+
+    if(!$usuario){
+
+        $_SESSION['error'] =
+        'Usuario no encontrado.';
+
+        header(
+        'Location: index.php?page=usuarios'
+        );
+
+        exit();
+    }
+
+    // Evitar eliminarse a sí mismo
+
+    if(
+        $usuario['id']
+        ==
+        $_SESSION['user_id']
+    ){
+
+        $_SESSION['error'] =
+        'No puedes eliminar tu propia cuenta.';
+
+        header(
+        'Location: index.php?page=usuarios'
+        );
+
+        exit();
+    }
+
+    // NUEVA VALIDACIÓN
+
+    if(
+        $this->usuarioModel
+        ->hasPrestamos($id)
+    ){
+
+        $_SESSION['error'] =
+        'No se puede eliminar el usuario porque tiene préstamos asociados.';
+
+        header(
+        'Location: index.php?page=usuarios'
+        );
+
+        exit();
+    }
+
+    $deleted =
+    $this->usuarioModel->delete($id);
+
+    if($deleted){
+
+        $_SESSION['success'] =
+        'Usuario eliminado correctamente';
+
+    }else{
+
+        $_SESSION['error'] =
+        'Error al eliminar el usuario';
+    }
+
+    header(
+    'Location: index.php?page=usuarios'
+    );
+
+    exit();
+}
 }

@@ -68,11 +68,24 @@ class Usuario {
      * Obtiene todos los usuarios (solo admin).
      */
     public function getAll(): array {
-        $stmt = $this->db->query(
-            "SELECT id, nombre, correo, rol, estado, created_at FROM usuarios ORDER BY nombre"
-        );
-        return $stmt->fetchAll();
-    }
+
+    $stmt = $this->db->query(
+
+        "SELECT
+            id,
+            nombre,
+            correo,
+            telefono,
+            rol,
+            estado,
+            created_at
+         FROM usuarios
+         ORDER BY nombre"
+
+    );
+
+    return $stmt->fetchAll();
+}
 
     /**
      * Obtiene un usuario por ID.
@@ -145,6 +158,24 @@ class Usuario {
         $stmt->execute([':email' => $email, ':id' => $excludeId]);
         return $stmt->fetchColumn() > 0;
     }
+
+    /**
+ * Verifica si un usuario tiene préstamos asociados
+ */
+public function hasPrestamos(int $id): bool {
+
+    $stmt = $this->db->prepare(
+        "SELECT COUNT(*)
+         FROM prestamos
+         WHERE usuario_id = :id"
+    );
+
+    $stmt->execute([
+        ':id' => $id
+    ]);
+
+    return $stmt->fetchColumn() > 0;
+}
 
     /**
      * Elimina un usuario.

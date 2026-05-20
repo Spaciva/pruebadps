@@ -160,8 +160,7 @@ $usuario['correo']
 <td>
 
 <?= Security::escape(
-$usuario['telefono']
-?: '-'
+$usuario['telefono'] ?? '-'
 ) ?>
 
 </td>

@@ -199,9 +199,6 @@ case 'libros':
 
 break;
 
-
-// ── CATEGORÍAS ───────────────────────────────────────────────
-
 // ── CATEGORÍAS ───────────────────────────────────────────────
 
 case 'categorias':
@@ -323,6 +320,8 @@ break;
 
 // ── USUARIOS ─────────────────────────────────────────────────
 
+// ── USUARIOS ─────────────────────────────────────────────────
+
 case 'usuarios':
 
     Session::requireRole([
@@ -332,9 +331,40 @@ case 'usuarios':
     require_once __DIR__ .
     '/controllers/UsuarioController.php';
 
-    $ctrl=new UsuarioController();
+    $ctrl = new UsuarioController();
 
-    $ctrl->index();
+    if($_SERVER['REQUEST_METHOD']==='POST'){
+
+        match($action){
+
+            'process-edit'
+                => $ctrl->processEdit(),
+
+            'delete'
+                => $ctrl->delete(),
+
+            'process-password'
+                => $ctrl->processChangePassword(),
+
+            default
+                => $ctrl->index()
+        };
+
+    }else{
+
+        match($action){
+
+            'edit'
+                => $ctrl->showEdit(),
+
+            'change-password'
+                => $ctrl->showChangePassword(),
+
+            default
+                => $ctrl->index()
+        };
+
+    }
 
 break;
 

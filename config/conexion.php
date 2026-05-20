@@ -4,7 +4,7 @@ $host = "localhost";
 $user = "root";
 $pass = "";
 $db = "biblioteca_fusalmo";
-$port = 3306;
+$port = 3307;
 
 $conn = new mysqli($host, $user, $pass, $db, $port);
 
